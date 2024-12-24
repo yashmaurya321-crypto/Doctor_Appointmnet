@@ -1,68 +1,89 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useSelector } from 'react-redux'; 
-import img1 from '../assets/doctor.jpeg'; 
+import { useSelector } from 'react-redux';
+import { NavigationProp, RouteProp } from '@react-navigation/native';
+import img1 from '../assets/doctor.jpeg';
 
-const OnSkip = ({ navigation, route }) => {
+type RootStackParamList = {
+  OnSkip: { appointmentId: string; data: any };
+  ConcernUpload: { appointmentId: string };
+  MyBooking: undefined;
+};
+
+type OnSkipProps = {
+  navigation: NavigationProp<RootStackParamList, 'OnSkip'>;
+  route: RouteProp<RootStackParamList, 'OnSkip'>;
+};
+
+type Appointment = {
+  id: string;
+  DoctorImage?: string;
+  DoctorName?: string;
+  type?: 'Chat' | 'Video';
+  concern?: {
+    [key: number]: {
+      severity?: string;
+      howLongFacing?: string;
+      description?: string;
+      sleepPattern?: string;
+      uploadedFiles?: string;
+    };
+  };
+};
+
+type State = {
+  doctors: { doctors: any[] };
+  appointments: { appointments: Appointment[] };
+};
+
+const OnSkip: React.FC<OnSkipProps> = ({ navigation, route }) => {
   const { appointmentId } = route.params;
-  const [appointment, setAppointment] = useState({});
-const doctor = useSelector((state) => state.doctors.doctors);
-  const {data} = route.params;
-  // Fetch appointment data based on appointmentId
-  const appointments = useSelector((state) => state.appointments.appointments);
-  
+  const [appointment, setAppointment] = useState<Appointment | undefined>(undefined);
+  const doctor = useSelector((state: State) => state.doctors.doctors);
+  const appointments = useSelector((state: State) => state.appointments.appointments);
+
   useEffect(() => {
-    const foundAppointment = appointments.find(app => app.id === appointmentId);
+    const foundAppointment = appointments.find((app) => app.id === appointmentId);
     if (foundAppointment) {
       setAppointment(foundAppointment);
     }
   }, [appointments, appointmentId]);
 
-  // Function to count uploaded files
-  const countFilledInfo = (concern) => {
+  const countFilledInfo = (concern: Appointment['concern']): number => {
     let filledCount = 0;
-  
-    // Ensure concern and necessary keys are present
+
     if (concern) {
-      // Check the nested fields inside concern[1], concern[2], and concern[3]
-      if (concern[1]) {
-        if (concern[1].severity.trim() !== "" && concern[1].howLongFacing.trim() !== "") filledCount++;
-      
+      if (concern[1] && concern[1].severity?.trim() && concern[1].howLongFacing?.trim()) {
+        filledCount++;
       }
-      if (concern[2]) {
-        if (concern[2].description.trim() !== "" && concern[2].sleepPattern.trim() !== "") filledCount++;
-   
+      if (concern[2] && concern[2].description?.trim() && concern[2].sleepPattern?.trim()) {
+        filledCount++;
       }
-      if (concern[3]) {
-        if (concern[3].uploadedFiles.trim() !== "") filledCount++;  // Check if uploadedFiles is not an empty string
+      if (concern[3] && concern[3].uploadedFiles?.trim()) {
+        filledCount++;
       }
     }
-  
+
     return filledCount;
   };
-  
 
-  const totalFilesCount = 3; 
+  const totalFilesCount = 3;
+  const uploadedFilesCount = countFilledInfo(appointment?.concern || {});
 
-  const uploadedFilesCount = countFilledInfo(appointment.concern || {});
-console.log("uploadedFilesCount", uploadedFilesCount);
   return (
     <View style={styles.container}>
-      {/* Success Icon */}
       <View style={styles.successIconContainer}>
         <MaterialCommunityIcons name="check-circle" size={70} color="#28a745" />
       </View>
 
-      {/* Header Text */}
       <Text style={styles.headerText}>Appointment Successfully Booked</Text>
 
-      {/* Doctor Information */}
       <View style={styles.doctorContainer}>
-        <Image source={{uri : appointment.DoctorImage}} style={styles.doctorImage} />
-        <Text style={styles.doctorName}>{appointment.DoctorName || 'Dr. Prerna'}</Text>
+        <Image source={{ uri: appointment?.DoctorImage }} style={styles.doctorImage} />
+        <Text style={styles.doctorName}>{appointment?.DoctorName || 'Dr. Prerna'}</Text>
         <Text style={styles.consultationInfo}>
-     {appointment.type  === "Chat"? "Chat - Free" : "Video - Paid"  }
+          {appointment?.type === 'Chat' ? 'Chat - Free' : 'Video - Paid'}
         </Text>
       </View>
 
@@ -70,37 +91,22 @@ console.log("uploadedFilesCount", uploadedFilesCount);
         <View style={styles.successIconContainer}>
           <MaterialCommunityIcons name="account-heart-outline" size={70} />
         </View>
-        <Text style={{
-          fontSize: 18,
-          fontWeight: 'bold',
-          color: '#333',
-          marginBottom: 5,
-          textAlign: 'center',
-        }}>
-          We understand your concern in skipping these steps.
-        </Text>
-        <Text style={{
-          fontSize: 14,
-          color: '#555',
-          textAlign: 'center'
-        }}>
+        <Text style={styles.messageHeader}>We understand your concern in skipping these steps.</Text>
+        <Text style={styles.messageBody}>
           If you ever feel ready, you can always provide this information to help the Doctor improve your care.
         </Text>
       </View>
 
-      {/* Displaying upload status */}
-     
       <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          style={styles.skipButton} 
+        <TouchableOpacity
+          style={styles.skipButton}
           onPress={() => navigation.navigate('ConcernUpload', { appointmentId })}
         >
-          <Text style={styles.skipButtonText}>Continue Uploading { uploadedFilesCount}/{totalFilesCount }</Text>
+          <Text style={styles.skipButtonText}>
+            Continue Uploading {uploadedFilesCount}/{totalFilesCount}
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.uploadButton} 
-          onPress={() => navigation.navigate('MyBooking')}
-        >
+        <TouchableOpacity style={styles.uploadButton} onPress={() => navigation.navigate('MyBooking')}>
           <Text style={styles.uploadButtonText}>View My Application</Text>
         </TouchableOpacity>
       </View>
@@ -117,7 +123,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 30,
     alignItems: 'center',
-    justifyContent : 'center'
+    justifyContent: 'center',
   },
   successIconContainer: {
     marginBottom: 20,
@@ -142,21 +148,24 @@ const styles = StyleSheet.create({
   doctorName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color:'#333',
-    marginBottom :5
+    color: '#333',
+    marginBottom: 5,
   },
   consultationInfo: {
     fontSize: 14,
-    color:'#555'
+    color: '#555',
   },
-  uploadStatusContainer:{
-    marginTop :20,
-    alignItems : 'center'
+  messageHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+    textAlign: 'center',
   },
-  uploadStatusText:{
-    fontSize :16,
-    fontWeight : '600',
-    color : '#333'
+  messageBody: {
+    fontSize: 14,
+    color: '#555',
+    textAlign: 'center',
   },
   buttonContainer: {
     width: '100%',
@@ -181,9 +190,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(58, 100, 60, 1)',
     alignItems: 'center',
   },
-  uploadButtonText:{
-    fontSize :16,
-    color : '#fff',
-    fontWeight :'600'
+  uploadButtonText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '600',
   },
 });

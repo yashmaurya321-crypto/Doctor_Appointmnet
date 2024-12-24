@@ -1,21 +1,47 @@
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
 import React from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import Header from '../Componenet/Header';
 import { useDispatch } from 'react-redux';
 import { setDoctors } from '../redux/DocterSlice';
-const Profile = ({ navigation, route }) => {
+
+interface ProfileProps {
+  navigation: any;
+  route: {
+    params: {
+      data: {
+        image: string;
+        name: string;
+        speciality: string;
+        followers: number;
+        yearofexperience: number;
+        reviews: { star: number; comment: string }[];
+        Bio: string;
+        workExperience: { hospital: string; years: string; street: string }[];
+        academicQualification: { degree: string; year: string; street: string }[];
+      };
+    };
+  };
+}
+
+const Profile: React.FC<ProfileProps> = ({ navigation, route }) => {
   const { data } = route.params;
-const dispatch = useDispatch();
+  const dispatch = useDispatch();
+
   return (
     <ScrollView style={styles.container}>
       <Header />
       <View style={styles.profileContainer}>
-        {/* Doctor's Info */}
         <Image source={{ uri: data.image }} style={styles.profileImage} />
         <Text style={styles.name}>{data.name}</Text>
         <Text style={styles.speciality}>{data.speciality}</Text>
 
-        {/* Stats Section */}
         <View style={styles.statsContainer}>
           <View style={styles.stat}>
             <Text style={styles.statNumber}>{data.followers}</Text>
@@ -30,14 +56,11 @@ const dispatch = useDispatch();
             <Text style={styles.statLabel}>Rating</Text>
           </View>
         </View>
-
-        {/* Bio Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Bio</Text>
           <Text style={styles.sectionContent}>{data.Bio}</Text>
         </View>
 
-        {/* Specialization Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Specializes in</Text>
           <View style={styles.specializationContainer}>
@@ -55,17 +78,18 @@ const dispatch = useDispatch();
             ))}
           </View>
         </View>
-
-        {/* Reviews and Ratings */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Reviews and Ratings</Text>
           {data.reviews.map((review, index) => (
-            <View key={index} style = {{
-              backgroundColor: '#f5f5f5',
-              padding: 10,
-              borderRadius: 5,
-              marginVertical: 5,
-            }}>
+            <View
+              key={index}
+              style={{
+                backgroundColor: '#f5f5f5',
+                padding: 10,
+                borderRadius: 5,
+                marginVertical: 5,
+              }}
+            >
               <Text style={styles.ratingText}>
                 {`⭐`.repeat(Math.round(review.star))}
                 {'\n'}
@@ -75,37 +99,55 @@ const dispatch = useDispatch();
           ))}
         </View>
 
-        {/* Work Experience */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Work Experience</Text>
           {data.workExperience.map((exp, index) => (
-            <View key={index} style = {{marginVertical: 5, lineHeight: 20,
-              backgroundColor: '#f5f5f5',}}>
-            <Text  style={styles.sectionContent}>
-              {exp.hospital} - {exp.years}
-              {'\n'}{exp.street}
-            </Text>
-            
+            <View
+              key={index}
+              style={{
+                marginVertical: 5,
+                lineHeight: 20,
+                backgroundColor: '#f5f5f5',
+              }}
+            >
+              <Text style={styles.sectionContent}>
+                {exp.hospital} - {exp.years}
+                {'\n'}
+                {exp.street}
+              </Text>
             </View>
           ))}
         </View>
 
-        {/* Academics */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Academics</Text>
           {data.academicQualification.map((qualification, index) => (
-            <View key={index} style = {{backgroundColor: '#f5f5f5', marginVertical: 5, lineHeight: 20}}>
-            <Text  style={styles.sectionContent}>
-              {qualification.degree} - {qualification.year}{'\n'}{qualification.street}
-            </Text>
+            <View
+              key={index}
+              style={{
+                backgroundColor: '#f5f5f5',
+                marginVertical: 5,
+                lineHeight: 20,
+              }}
+            >
+              <Text style={styles.sectionContent}>
+                {qualification.degree} - {qualification.year}
+                {'\n'}
+                {qualification.street}
+              </Text>
             </View>
           ))}
         </View>
       </View>
 
-      {/* Book Consultation Button */}
-      <TouchableOpacity style={styles.bookButton} onPress={() => {dispatch(setDoctors(data));navigation.navigate('Appointment', {data})}}>
-        <Text style={styles.bookButtonText} >Book Consultation</Text>
+      <TouchableOpacity
+        style={styles.bookButton}
+        onPress={() => {
+          dispatch(setDoctors(data));
+          navigation.navigate('Appointment', { data });
+        }}
+      >
+        <Text style={styles.bookButtonText}>Book Consultation</Text>
       </TouchableOpacity>
     </ScrollView>
   );

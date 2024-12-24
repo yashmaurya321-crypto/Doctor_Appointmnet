@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -14,10 +13,27 @@ import Confirm from './Screens/Confirm';
 import Booked from './Screens/Booked';
 import OnSkip from './Screens/OnSkip';
 import MyBooking from './Screens/MyBooking';
-import ConcernUpload from './Screens/Concernuplode';
+import ConcernUpload from './Screens/ConcernUpload';
 import Complete from './Screens/Complete';
 
-const Stack = createStackNavigator();
+import { enableScreens } from 'react-native-screens';
+
+enableScreens();
+
+export type RootStackParamList = {
+  Concern: undefined;
+  Consult: undefined;
+  Profile: { data: any }; 
+  Appointment: { data: any };
+  Confirm: undefined;
+  Booked: undefined;
+  OnSkip: undefined;
+  MyBooking: undefined;
+  ConcernUpload: undefined;
+  Complete: undefined;
+};
+
+const Stack = createStackNavigator<RootStackParamList>();
 
 function AppNavigator() {
   return (
@@ -28,7 +44,6 @@ function AppNavigator() {
           headerShown: false,
         }}
       >
-        {/* Define all routes here */}
         <Stack.Screen name="Concern" component={Concern} />
         <Stack.Screen name="Consult" component={Consult} />
         <Stack.Screen name="Profile" component={Profile} />
@@ -51,6 +66,7 @@ export default function App() {
     </Provider>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     display: 'flex',

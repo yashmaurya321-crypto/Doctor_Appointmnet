@@ -1,45 +1,59 @@
 import React from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import img1 from '../assets/doctor.jpeg'; 
 import { useSelector } from 'react-redux';
-const Booked = ({navigation, route}) => {
-  const {appointmentId, data} = route.params;
-const doctor = useSelector((state) => state.doctors.doctors);
-  const appointments = useSelector((state) => state.appointments.appointments);
-  const currentAppointment = appointments.find(app => app.id === appointmentId);
-console.log("from booked ",doctor);
-  console.log("from booked ",appointmentId);
+
+interface BookedProps {
+  navigation: any;
+  route: {
+    params: {
+      appointmentId: string;
+      data: {
+        image: string;
+        name: string;
+        video: string;
+      };
+    };
+  };
+}
+
+const Booked: React.FC<BookedProps> = ({ navigation, route }) => {
+  const { appointmentId, data } = route.params;
+  const doctor = useSelector((state: any) => state.doctors.doctors);
+  const appointments = useSelector((state: any) => state.appointments.appointments);
+  const currentAppointment = appointments.find((app: { id: string }) => app.id === appointmentId);
+
   return (
     <View style={styles.container}>
-     
       <View style={styles.successIconContainer}>
         <MaterialCommunityIcons name="check-circle" size={70} color="#28a745" />
       </View>
 
       <Text style={styles.headerText}>Appointment Successfully Booked</Text>
 
-  
       <View style={styles.doctorContainer}>
-        <Image source={{uri : doctor.image}} style={styles.doctorImage} />
+        <Image source={{ uri: doctor.image }} style={styles.doctorImage} />
         <Text style={styles.doctorName}>{doctor.name}</Text>
         <Text style={styles.consultationInfo}>
-{currentAppointment.type === 'Chat' ? 'Chat Consultation - Free' : 'Video Consultation - ' + doctor.video}
-</Text>
+          {currentAppointment.type === 'Chat' ? 'Chat Consultation - Free' : 'Video Consultation - ' + doctor.video}
+        </Text>
       </View>
 
-    
       <Text style={styles.message}>
-        86% of users who submitted their reports and shared detailed
-        information with the doctor have successfully improved their health.
+        86% of users who submitted their reports and shared detailed information with the doctor have successfully improved their health.
       </Text>
 
-    
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.skipButton} onPress={()=>navigation.navigate('OnSkip', {appointmentId})}>
+        <TouchableOpacity 
+          style={styles.skipButton} 
+          onPress={() => navigation.navigate('OnSkip', { appointmentId })}
+        >
           <Text style={styles.skipButtonText}>Skip</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.uploadButton} onPress={()=>navigation.navigate('ConcernUpload',{appointmentId})}>
+        <TouchableOpacity 
+          style={styles.uploadButton} 
+          onPress={() => navigation.navigate('ConcernUpload', { appointmentId })}
+        >
           <Text style={styles.uploadButtonText}>Upload Health Records</Text>
         </TouchableOpacity>
       </View>
@@ -56,7 +70,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 30,
     alignItems: 'center',
-    justifyContent : 'center'
+    justifyContent: 'center',
   },
   successIconContainer: {
     marginBottom: 20,
@@ -94,7 +108,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 50,
     lineHeight: 20,
-    fontStyle : 'italic'
+    fontStyle: 'italic',
   },
   buttonContainer: {
     width: '100%',
@@ -114,16 +128,16 @@ const styles = StyleSheet.create({
     color: '#28a745',
     fontWeight: '600',
   },
-  uploadButton: {
-    width: '90%',
-    paddingVertical: 15,
-    borderRadius: 8,
-    backgroundColor: '#28a745',
-    alignItems: 'center',
-  },
-  uploadButtonText: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '600',
-  },
+  uploadButton:{
+     width:'90%',
+     paddingVertical :15,
+     borderRadius :8,
+     backgroundColor :'#28a745',
+     alignItems :'center'
+   },
+   uploadButtonText:{
+     fontSize :16,
+     color :'#fff',
+     fontWeight :'600'
+   }
 });

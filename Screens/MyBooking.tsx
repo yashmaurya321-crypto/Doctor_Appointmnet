@@ -4,19 +4,47 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSelector } from "react-redux";
 import Header from '../Componenet/Header';
 
-const MyBooking = ({navigation}) => {
-  const appointmentsList = useSelector(state => state.appointments.appointments);
-console.log("MyAppointments", appointmentsList)
-  const countFilledInfo = (concern) => {
-    console.log("concern", concern);
-    console.log(concern[1], concern[2], concern[3])
+interface Concern {
+  type: string;
+  [key: number]: {
+    severity?: string;
+    description?: string;
+    uploadedFiles?: string[];
+  };
+}
+
+interface Appointment {
+  id: string;
+  DoctorImage: string;
+  DoctorName: string;
+  status?: string;
+  concern: Concern;
+  appointment: {
+    date: string;
+    time: string;
+  };
+}
+
+interface RootState {
+  appointments: {
+    appointments: Appointment[];
+  };
+}
+
+interface NavigationProps {
+  navigation: {
+    navigate: (screen: string, params: any) => void;
+  };
+}
+
+const MyBooking: React.FC<NavigationProps> = ({ navigation }) => {
+  const appointmentsList = useSelector((state: RootState) => state.appointments.appointments);
+
+  const countFilledInfo = (concern: Concern): number => {
     let filledCount = 0;
     if (concern[1]?.severity) filledCount++;
-    console.log("severity", filledCount);
     if (concern[2]?.description) filledCount++;
-    console.log("description", filledCount);
     if (concern[3]?.uploadedFiles) filledCount++;
-    console.log("uploadedFiles", filledCount);
     return filledCount;
   };
 
@@ -32,7 +60,6 @@ console.log("MyAppointments", appointmentsList)
         </TouchableOpacity>
       </View>
 
-      {/* Render Appointment Cards Dynamically */}
       {appointmentsList.length > 0 ? (
         appointmentsList.map((appointment) => (
           <View key={appointment.id} style={styles.card}>
@@ -40,7 +67,7 @@ console.log("MyAppointments", appointmentsList)
               <Image source={{ uri: appointment.DoctorImage }} style={styles.doctorImage} />
               <View>
                 <Text style={styles.doctorName}>{appointment.DoctorName}</Text>
-                <Text style={styles.speciality}>{appointment.concern.type}</Text> {/* Displaying concern type */}
+                <Text style={styles.speciality}>{appointment.concern.type}</Text>
               </View>
               <View style={styles.statusContainer}>
                 <Text style={appointment.status === 'completed' ? styles.completedStatus : styles.upcomingStatus}>
@@ -60,14 +87,13 @@ console.log("MyAppointments", appointmentsList)
             </View>
 
             <View style={styles.infoContainer}>
-              {/* Conditional rendering based on appointment status */}
               {appointment.status === 'completed' ? (
                 <>
                   <Text style={styles.infoTitle}>Check Prescription</Text>
                   <Text style={styles.infoSubtitle}>{appointment.DoctorName} has suggested you some solutions.</Text>
                 </>
               ) : (
-                <TouchableOpacity onPress={()=>navigation.navigate('ConcernUpload', {appointmentId : appointment.id})}>
+                <TouchableOpacity onPress={() => navigation.navigate('ConcernUpload', { appointmentId: appointment.id })}>
                   <Text style={styles.infoTitle}>Add Medical Information ({countFilledInfo(appointment.concern)}/3)</Text>
                   <Text style={styles.infoSubtitle}>Concern Severity: {appointment.concern[1]?.severity || 'Not provided'}</Text>
                   <Text style={styles.infoSubtitle}>Description: {appointment.concern[2]?.description || 'Not provided'}</Text>
@@ -94,7 +120,6 @@ console.log("MyAppointments", appointmentsList)
           </View>
         ))
       ) : (
-        // Placeholder when there are no appointments
         <View style={styles.noAppointmentsContainer}>
           <Text>No appointments found.</Text>
         </View>
@@ -158,94 +183,94 @@ const styles = StyleSheet.create({
   doctorName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color:'#333'
-   },
-   speciality:{
-     fontSize :14 ,
-     color:'#777'
-   },
-   statusContainer:{
-     marginLeft:'auto'
-   },
-   upcomingStatus:{
-     backgroundColor:'#ffedd5' ,
-     color:'#ff7a00' ,
-     fontSize :12 ,
-     paddingVertical :3 ,
-     paddingHorizontal :8 ,
-     borderRadius :5
-   },
-   completedStatus:{
-     backgroundColor:'#d4edda' ,
-     color:'#28a745' ,
-     fontSize :12 ,
-     paddingVertical :3 ,
-     paddingHorizontal :8 ,
-     borderRadius :5
-   },
-   dateTimeContainer:{
-     flexDirection:'row' ,
-     alignItems:'center' ,
-     marginBottom :10
-   },
-   dateTimeText:{
-     fontSize :14 ,
-     color:'#555' ,
-     marginLeft :5 ,
-     marginRight :15
-   },
-   infoContainer:{
-     backgroundColor:'#f8f9fa' ,
-     borderRadius :8 ,
-     padding :10,
-     marginBottom :15
-   },
-   infoTitle:{
-     fontSize :14 ,
-     fontWeight :'bold' ,
-     color:'#333' ,
-     marginBottom :5
-   },
-   infoSubtitle:{
-     fontSize :12 ,
-     color:'#777'
-   },
-   buttonContainer:{
-     flexDirection:'row' ,
-     justifyContent:'space-between'
-   },
-   detailsButton:{
-     flex :1 ,
-     backgroundColor:'#fff' ,
-     paddingVertical :10 ,
-     paddingHorizontal :15 ,
-     borderRadius :8 ,
-     borderWidth :1 ,
-     borderColor :'#28a745' ,
-     alignItems :'center' ,
-     marginRight :10
-   },
-   detailsButtonText:{
-     color:'#28a745' ,
-     fontSize :14 ,
-     fontWeight :'600'
-   },
-   joinButton:{
-     flex :1 ,
-     backgroundColor:'#28a745' ,
-     paddingVertical :10 ,
-     paddingHorizontal :15 ,
-     borderRadius :8 ,
-     alignItems :'center'
-   },
-   joinButtonText:{
-      color:'#fff' , 
-      fontSize :14 , 
-      fontWeight :'600'
-   },
-   noAppointmentsContainer:{
-      alignItems:'center', 
-      justifyContent:'center', 
-      paddingVertical:'20%'
-   }
+    color: '#333',
+  },
+  speciality: {
+    fontSize: 14,
+    color: '#777',
+  },
+  statusContainer: {
+    marginLeft: 'auto',
+  },
+  upcomingStatus: {
+    backgroundColor: '#ffedd5',
+    color: '#ff7a00',
+    fontSize: 12,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 5,
+  },
+  completedStatus: {
+    backgroundColor: '#d4edda',
+    color: '#28a745',
+    fontSize: 12,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 5,
+  },
+  dateTimeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  dateTimeText: {
+    fontSize: 14,
+    color: '#555',
+    marginLeft: 5,
+    marginRight: 15,
+  },
+  infoContainer: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 15,
+  },
+  infoTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  infoSubtitle: {
+    fontSize: 12,
+    color: '#777',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  detailsButton: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#28a745',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  detailsButtonText: {
+    color: '#28a745',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  joinButton: {
+    flex: 1,
+    backgroundColor: '#28a745',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  joinButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  noAppointmentsContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: '20%',
+  },
 });

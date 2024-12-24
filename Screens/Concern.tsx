@@ -11,8 +11,9 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Header from '../Componenet/Header';
-import {useDispatch} from 'react-redux'
-import {initializeAppointment, updateConcernType} from '../redux/AppointmentSlice'
+import { useDispatch } from 'react-redux';
+import { initializeAppointment, updateConcernType } from '../redux/AppointmentSlice';
+
 type ConcernType = {
   id: string;
   name: string;
@@ -21,8 +22,9 @@ type ConcernType = {
 
 const { width } = Dimensions.get('window');
 
-const Concern: React.FC = ({ navigation }) => {
-  const dispatch = useDispatch()
+const Concern: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const dispatch = useDispatch();
+  
   const topConcerns: ConcernType[] = [
     { id: '1', name: 'Hypertension', icon: 'heart-pulse' },
     { id: '2', name: 'Diabetes', icon: 'needle' },
@@ -35,7 +37,6 @@ const Concern: React.FC = ({ navigation }) => {
     { id: '1', name: 'Hypertension', icon: 'heart-pulse' },
     { id: '2', name: 'Anxiety', icon: 'emoticon-sad-outline' },
     { id: '3', name: 'Obesity', icon: 'weight' },
-  
   ];
 
   const lifestyleConcerns: ConcernType[] = [
@@ -46,17 +47,23 @@ const Concern: React.FC = ({ navigation }) => {
     { id: '5', name: 'PCOS', icon: 'gender-female' },
     { id: '6', name: 'Insomnia', icon: 'bed-empty' },
   ];
+
   const renderConcernItem = ({ item }: { item: ConcernType }) => (
     <View>
-      <TouchableOpacity  onPress={() => { dispatch(initializeAppointment());dispatch(updateConcernType(item.name));navigation.navigate('Consult',{active : item.name})}} style={styles.concernItem}>
-      <View style={styles.concernIconWrapper}>
-        <MaterialCommunityIcons name={item.icon} size={40} color="#5DAE8B" />
-      </View>
-      
-    </TouchableOpacity>
-    <Text style={styles.concernText}>{item.name}</Text>
+      <TouchableOpacity 
+        onPress={() => {
+          dispatch(initializeAppointment());
+          dispatch(updateConcernType(item.name));
+          navigation.navigate('Consult', { active: item.name });
+        }} 
+        style={styles.concernItem}
+      >
+        <View style={styles.concernIconWrapper}>
+          <MaterialCommunityIcons name={item.icon} size={40} color="#5DAE8B" />
+        </View>
+      </TouchableOpacity>
+      <Text style={styles.concernText}>{item.name}</Text>
     </View>
-    
   );
 
   return (
@@ -89,8 +96,7 @@ const Concern: React.FC = ({ navigation }) => {
             contentContainerStyle={styles.concernListGrid}
           />
 
-          
-<Text style={[styles.sectionTitle, { marginTop: 26, }]}>Top concrens</Text>
+          <Text style={[styles.sectionTitle, { marginTop: 26 }]}>Top Concerns</Text>
           <FlatList
             data={topConcerns}
             renderItem={renderConcernItem}
@@ -133,36 +139,36 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     paddingHorizontal: 8,
   },
-  concernListGrid: {
-    paddingHorizontal: 8,
-  },
-  concernItem: {
-    backgroundColor: 'white',
-    borderRadius: 100, 
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: width * 0.2, 
-    height: width * 0.2,
-    marginHorizontal: width * 0.03,
-    marginVertical: width * 0.03,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 4,
-  },
-  concernIconWrapper: {
-    backgroundColor: '#E6F2E8',
-    borderRadius: 50,
-    width: '70%',
-    height: '70%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  concernText: {
-    marginTop: 1,
-    fontSize: width * 0.035,
-    fontWeight: '500',
-    textAlign: 'center',
-    color: '#2E7D6A',
-  },
+  concernListGrid:{
+     paddingHorizontal :8
+   },
+   concernItem:{
+     backgroundColor:'white',
+     borderRadius :100, 
+     alignItems:'center',
+     justifyContent:'center',
+     width : width * .2, 
+     height : width * .2, 
+     marginHorizontal : width * .03,
+     marginVertical : width * .03,
+     shadowColor:'#000',
+     shadowOpacity:.2,
+     shadowRadius :5,
+     elevation :4
+   },
+   concernIconWrapper:{
+     backgroundColor:'#E6F2E8',
+     borderRadius :50,
+     width:'70%',
+     height:'70%',
+     alignItems:'center',
+     justifyContent:'center'
+   },
+   concernText:{
+     marginTop :1,
+     fontSize :width * .035,
+     fontWeight :'500',
+     textAlign :'center',
+     color:'#2E7D6A'
+   }
 });

@@ -1,36 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  Image,
-  ScrollView,
-} from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, Image, ScrollView } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { Picker } from '@react-native-picker/picker';
 import Header from '../Componenet/Header';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { WebView } from 'react-native-webview';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateConcernDetails, updateAppointment } from '../redux/AppointmentSlice';
+import { updateConcernDetails } from '../redux/AppointmentSlice';
 
-const ConcernUpload = ({ navigation, route }) => {
+interface ConcernUploadProps {
+  navigation: any;
+  route: {
+    params: {
+      appointmentId: string;
+    };
+  };
+}
+
+const ConcernUpload: React.FC<ConcernUploadProps> = ({ navigation, route }) => {
   const dispatch = useDispatch();
-  const [step, setStep] = useState(1);
-  const [severity, setSeverity] = useState('');
-  const [duration, setDuration] = useState('');
-  const [timeUnit, setTimeUnit] = useState('Days');
-  const [description, setDescription] = useState('');
-  const [sleepPattern, setSleepPattern] = useState('');
-  const [selectedFile, setSelectedFile] = useState(null);
-
+  const [step, setStep] = useState<number>(1);
+  const [severity, setSeverity] = useState<string>('');
+  const [duration, setDuration] = useState<string>('');
+  const [timeUnit, setTimeUnit] = useState<string>('Days');
+  const [description, setDescription] = useState<string>('');
+  const [sleepPattern, setSleepPattern] = useState<string>('');
+  const [selectedFile, setSelectedFile] = useState<{ name: string; uri: string } | null>(null);
+  
   const { appointmentId } = route.params;
-  console.log("from concern upload",appointmentId);
-  const appointments = useSelector((state) => state.appointments.appointments);
-  const currentAppointment = appointments.find(app => app.id === appointmentId);
+  const appointments = useSelector((state: any) => state.appointments.appointments);
+  const currentAppointment = appointments.find((app: { id: string }) => app.id === appointmentId);
 
   useEffect(() => {
     if (currentAppointment?.concern) {
@@ -48,10 +45,7 @@ const ConcernUpload = ({ navigation, route }) => {
         setSleepPattern(concernData['2'].sleepPattern || '');
       }
       if (concernData['3']?.uploadedFiles) {
-        setSelectedFile({
-          name: concernData['3'].uploadedFiles,
-          uri: concernData['3'].uploadedFiles,
-        });
+        setSelectedFile({ name: concernData['3'].uploadedFiles, uri: concernData['3'].uploadedFiles });
       }
     }
   }, [currentAppointment]);
@@ -61,15 +55,10 @@ const ConcernUpload = ({ navigation, route }) => {
       Alert.alert('Required Fields', 'Please fill in all required fields');
       return;
     }
-    console.log("Dispatching action with payload:", { id : 1734947032829, step, data : { severity: severity,
-      howLongFacing: `${duration} ${timeUnit}`} });
     dispatch(updateConcernDetails({
-      id: appointmentId,  
+      id: appointmentId,
       step: '1',
-      data: {
-        severity: severity,
-        howLongFacing: `${duration} ${timeUnit}` 
-      }
+      data: { severity: severity, howLongFacing: `${duration} ${timeUnit}` },
     }));
     nextStep();
   };
@@ -79,14 +68,10 @@ const ConcernUpload = ({ navigation, route }) => {
       Alert.alert('Required Fields', 'Please fill in all required fields');
       return;
     }
-
     dispatch(updateConcernDetails({
-      id: appointmentId,  
+      id: appointmentId,
       step: '2',
-      data: {
-        description: description,
-        sleepPattern: sleepPattern
-      }
+      data: { description: description, sleepPattern: sleepPattern },
     }));
     nextStep();
   };
@@ -97,203 +82,96 @@ const ConcernUpload = ({ navigation, route }) => {
         type: ['application/pdf', 'image/*'],
         copyToCacheDirectory: true,
       });
-  console.log("File upload result:", result);
-      if (result.assets[0].name) {
+      if (result.assets && result.assets.length > 0) {
         const fileData = {
           name: result.assets[0].name,
           uri: result.assets[0].uri,
           mimeType: result.assets[0].mimeType || '',
         };
-        
-        // Set the selected file data and log the file immediately
         setSelectedFile(fileData);
-        console.log("Selected file:", fileData);
-  
         Alert.alert('Success', 'File uploaded successfully');
       } else {
         Alert.alert('Error', 'No file selected');
       }
     } catch (err) {
       Alert.alert('Error', 'Failed to upload file. Please try again.');
-      console.error('File upload error:', err);
     }
   };
-  
-  
 
   const handleSubmitAll = () => {
     if (selectedFile) {
       dispatch(updateConcernDetails({
         id: appointmentId,
         step: '3',
-        data: {
-          uploadedFiles: selectedFile.name // Assuming you are sending the file name or URI to the backend
-        }
+        data: { uploadedFiles: selectedFile.name },
       }));
     }
     navigation.navigate('Complete');
   };
 
   const nextStep = () => setStep(step + 1);
-  const prevStep = () => setStep(step - 1);
-
+  
   return (
     <ScrollView style={styles.container}>
-      <Header title={'Your Concern'} nav={'OnSkip'}/>
+      <Header title={'Your Concern'} nav={'OnSkip'} />
       <View style={styles.progressContainer}>
         {[1, 2, 3].map((stepNum) => (
-          <View
-            key={stepNum}
-            style={[
-              styles.progressStep,
-              step >= stepNum && styles.activeProgressStep,
-            ]}
-          />
+          <View key={stepNum} style={[styles.progressStep, step >= stepNum && styles.activeProgressStep]} />
         ))}
       </View>
-
+      
+      {/* Step Content */}
       {step === 1 && (
         <View style={styles.stepContainer}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Your Concern</Text>
-            <View style={styles.prefilledBox}>
-              <Text style={styles.prefilledText}>{currentAppointment.concern.type} </Text>
-            </View>
+          <Text style={styles.label}>Select Severity of Your Concern</Text>
+          <View style={styles.severityContainer}>
+            {['Mild', 'Moderate', 'Severe'].map((level) => (
+              <TouchableOpacity key={level} style={[styles.severityButton, severity === level && styles.activeSeverity]} onPress={() => setSeverity(level)}>
+                <Text style={styles.severityText}>{level}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Select Severity of Your Concern</Text>
-            <View style={styles.severityContainer}>
-              {['Mild', 'Moderate', 'Severe'].map((level) => (
-                <TouchableOpacity
-                  key={level}
-                  style={[
-                    styles.severityButton,
-                    severity === level && styles.activeSeverity,
-                  ]}
-                  onPress={() => setSeverity(level)}
-                >
-                  <Text style={styles.severityText}>{level}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>How long have you been facing?</Text>
-            <View style={styles.rowContainer}>
-              <TextInput
-                style={styles.durationInput}
-                placeholder="Enter duration"
-                keyboardType="numeric"
-                value={duration}
-                onChangeText={setDuration}
-              />
-              <Picker
-                selectedValue={timeUnit}
-                style={styles.timePicker}
-                onValueChange={(itemValue) => setTimeUnit(itemValue)}
-              >
-                {['Days', 'Weeks', 'Months', 'Years'].map((unit) => (
-                  <Picker.Item key={unit} label={unit} value={unit} />
-                ))}
-              </Picker>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={[styles.button, (!severity || !duration) && styles.buttonDisabled]}
-            onPress={handleStep1Submit}
-            disabled={!severity || !duration}
-          >
+          <TextInput placeholder="Enter duration" value={duration} onChangeText={setDuration} keyboardType="numeric" style={styles.input} />
+          <Picker selectedValue={timeUnit} onValueChange={(itemValue) => setTimeUnit(itemValue)} style={styles.timePicker}>
+            {['Days', 'Weeks', 'Months', 'Years'].map((unit) => (
+              <Picker.Item key={unit} label={unit} value={unit} />
+            ))}
+          </Picker>
+          <TouchableOpacity onPress={handleStep1Submit} disabled={!severity || !duration} style={[styles.button, (!severity || !duration) && styles.buttonDisabled]}>
             <Text style={styles.buttonText}>Proceed</Text>
           </TouchableOpacity>
         </View>
       )}
-
+      
       {step === 2 && (
         <View style={{ padding: 20 }}>
-          <Text style={styles.heading}>Briefly Describe</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Briefly describe your concern"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-          />
-
-          <Text style={styles.label}>Enter your sleep pattern</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Sleep Pattern"
-            value={sleepPattern}
-            onChangeText={setSleepPattern}
-          />
-
-          <View>
-            <Text style={styles.infoText}>
-              90% of users who attached their reports with the doctor have successfully improved their health.
-            </Text>
-          </View>
-
-          <TouchableOpacity 
-            style={styles.button}
-            onPress={handleStep2Submit}
-            disabled={!description || !sleepPattern}
-          >
+          <TextInput placeholder="Briefly describe your concern" value={description} onChangeText={setDescription} multiline style={styles.input} />
+          <TextInput placeholder="Sleep Pattern" value={sleepPattern} onChangeText={setSleepPattern} style={styles.input} />
+          <TouchableOpacity onPress={handleStep2Submit} disabled={!description || !sleepPattern} style={[styles.button]}>
             <Text style={styles.buttonText}>Attach Reports</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.skipButton}
-            onPress={() => navigation.navigate('OnSkip', { appointmentId })}
-          >
+          <TouchableOpacity onPress={() => navigation.navigate('OnSkip', { appointmentId })}>
             <Text style={styles.skipText}>I'll do it later</Text>
           </TouchableOpacity>
         </View>
       )}
-
+      
       {step === 3 && (
         <View style={{ padding: 20 }}>
-          <Text style={styles.heading}>Attach Reports</Text>
-          <TouchableOpacity style={styles.uploadBox} onPress={handleFileUpload}>
+          <TouchableOpacity onPress={handleFileUpload} style={styles.uploadBox}>
             {selectedFile ? (
-              <View style = {{marginTop: 120}}>
-                <Text style={styles.uploadText}>
-                  Selected File: {selectedFile.name}
-                </Text>
-                {selectedFile.mimeType?.startsWith('image/') ? (
-                  <Image
-                    source={{ uri: selectedFile.uri }}
-                    style={styles.imagePreview}
-                    resizeMode="contain"
-                  />
-                ) : selectedFile.mimeType === 'application/pdf' ? (
-                  <View style={styles.pdfPreview}>
-                   
-                  </View>
-                ) : (
-                  <Text style={styles.uploadText}>Preview not available for this file type.</Text>
-                )}
-              </View>
+              <>
+                <Text style={styles.uploadText}>Selected File: {selectedFile.name}</Text>
+                {/* Preview logic here */}
+              </>
             ) : (
-              <Text style={styles.uploadText}>
-                Upload pdf, png, jpg, or svg file.
-              </Text>
+              <Text style={styles.uploadText}>Upload pdf, png, jpg, or svg file.</Text>
             )}
           </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.button} 
-            onPress={handleSubmitAll}
-          >
+          <TouchableOpacity onPress={handleSubmitAll} style={[styles.button]}>
             <Text style={styles.buttonText}>Submit</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => navigation.navigate('OnSkip', { appointmentId })}
-          >
+          <TouchableOpacity onPress={() => navigation.navigate('OnSkip', { appointmentId })}>
             <Text style={styles.secondaryButtonText}>Skip</Text>
           </TouchableOpacity>
         </View>

@@ -62,7 +62,6 @@ const appointmentSlice = createSlice({
   name: 'appointments',
   initialState,
   reducers: {
-    // Initialize a new appointment with ID
     initializeAppointment: (state) => {
       state.currentAppointment = {
         ...initialState.currentAppointment,
@@ -70,20 +69,16 @@ const appointmentSlice = createSlice({
       };
       console.log("Initialized appointment with ID: ", state.currentAppointment.id);
     },
-
-    // Update concern type (from 1st component)
     updateConcernType: (state, action) => {
       state.currentAppointment.concern.type = action.payload;
       console.log("Updated concern type: ", state.currentAppointment.concern.type);
     },
 
-    // Update doctor name (from 2nd component)
     updateDoctorName: (state, action) => {
       state.currentAppointment.DoctorName = action.payload;
 console.log("Updated doctor name: ", state.currentAppointment.DoctorName);
     },
 
-    // Update consultation type and appointment details (from 3rd component)
     updateConsultationType: (state, action) => {
       state.currentAppointment.type = action.payload;
       console.log("Updated consultation type: ", state.currentAppointment.type);
@@ -94,12 +89,10 @@ console.log("Updated doctor name: ", state.currentAppointment.DoctorName);
       state.currentAppointment.appointment = { date, time };
       console.log("Updated appointment date and time: ", state.currentAppointment.appointment);
     },
-
-    // Update concern details (from 4th component)
+)
     updateConcernDetails: (state, action) => {
         const { id, step, data } = action.payload;
       
-        // Check if the id is undefined or invalid
         if (id === undefined) {
           console.error("Invalid ID provided for updating concern details.");
           return;
@@ -110,9 +103,9 @@ console.log("Updated doctor name: ", state.currentAppointment.DoctorName);
         const index = state.appointments.findIndex(apt => apt.id === id);
         
         if (index !== -1) {
-          // Ensure the concern and step exist before updating
+        
           if (state.appointments[index].concern[step]) {
-            // Update the concern details in the specific step
+            
             state.appointments[index].concern[step] = {
               ...state.appointments[index].concern[step],
               ...data
@@ -148,7 +141,6 @@ console.log("Updated doctor image: ", state.currentAppointment.DoctorImage);
       console.log("Appointment saved: ", state.appointments);
     },
 
-    // Update existing appointment
     updateAppointment: (state, action) => {
       const index = state.appointments.findIndex(apt => apt.id === action.payload.id);
       if (index !== -1) {
@@ -157,13 +149,11 @@ console.log("Updated doctor image: ", state.currentAppointment.DoctorImage);
       console.log("Updated appointment: ", state.appointments[index]);
     },
 
-    // Delete appointment
     deleteAppointment: (state, action) => {
       state.appointments = state.appointments.filter(apt => apt.id !== action.payload);
       console.log("Deleted appointment: ", action.payload);
     },
 
-    // Set all appointments (useful for loading from API)
     setAppointments: (state, action) => {
       state.appointments = action.payload;
       console.log("Appointments set: ", state.appointments);
@@ -183,8 +173,8 @@ export const {
   updateAppointment,
   deleteAppointment,
   setAppointments,
-  updateAppointmentStatus, // New actiona
-  updateDoctorImage // New action
+  updateAppointmentStatus, 
+  updateDoctorImage 
 } = appointmentSlice.actions;
 
 export default appointmentSlice.reducer;

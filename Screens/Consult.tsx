@@ -1,22 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, FlatList, Image, TouchableOpacity } from 'react-native';
-import img1 from '../assets/doctor.jpeg';
-import Header from '../Componenet/Header';
 import { useDispatch } from 'react-redux';
 import { updateDoctorImage, updateDoctorName } from '../redux/AppointmentSlice';
+import Header from '../Componenet/Header';
 import doctors from '../Componenet/Doctor';
-const Consult = ({ navigation, route }) => {
-    const [filter, setFilter] = useState('All'); 
+
+interface Doctor {
+  name: string;
+  speciality: string;
+  experience: string;
+  image: string;
+  video: number;
+  reviews: Array<{
+    star: number;
+  }>;
+}
+
+interface RouteParams {
+  active: string;
+}
+
+interface ConsultProps {
+  navigation: {
+    navigate: (screen: string, params?: any) => void;
+  };
+  route: {
+    params: RouteParams;
+  };
+}
+
+type FilterType = 'All' | 'Hypertension' | 'Diabetes' | 'Obesity' | 'Anxiety' | 'PCOS' | 'Insomnia';
+
+const Consult: React.FC<ConsultProps> = ({ navigation, route }) => {
+    const [filter, setFilter] = useState<FilterType>('All');
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const { active } = route.params;
-        setFilter(active);
+        setFilter(active as FilterType);
     }, []);
 
-    const dispatch = useDispatch();
-
-    
-    const filteredDoctors =
+    const filteredDoctors: Doctor[] =
         filter === 'All' ? doctors : doctors.filter((doc) => doc.speciality === filter);
 
     return (
@@ -24,63 +48,31 @@ const Consult = ({ navigation, route }) => {
             <Header title="Consult" nav="Concern" />
             <View>
                 <View style={styles.filterContainer}>
-                    <TouchableOpacity
-                        style={[styles.filterButton, filter === 'All' && styles.activeFilter]}
-                        onPress={() => setFilter('All')}
-                    >
-                        <Text style={[styles.filterText, filter === 'All' && styles.activeFilterText]}>All</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.filterButton, filter === 'Hypertension' && styles.activeFilter]}
-                        onPress={() => setFilter('Hypertension')}
-                    >
-                        <Text style={[styles.filterText, filter === 'Hypertension' && styles.activeFilterText]}>Hypertension</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.filterButton, filter === 'Diabetes' && styles.activeFilter]}
-                        onPress={() => setFilter('Diabetes')}
-                    >
-                        <Text style={[styles.filterText, filter === 'Diabetes' && styles.activeFilterText]}>Diabetes</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.filterButton, filter === 'Obesity' && styles.activeFilter]}
-                        onPress={() => setFilter('Obesity')}
-                    >
-                        <Text style={[styles.filterText, filter === 'Obesity' && styles.activeFilterText]}>Obesity</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.filterButton, filter === 'Anxiety' && styles.activeFilter]}
-                        onPress={() => setFilter('Anxiety')}
-                    >
-                        <Text style={[styles.filterText, filter === 'Anxiety' && styles.activeFilterText]}>Anxiety</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.filterButton, filter === 'PCOS' && styles.activeFilter]}
-                        onPress={() => setFilter('PCOS')}
-                    >
-                        <Text style={[styles.filterText, filter === 'PCOS' && styles.activeFilterText]}>PCOS</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.filterButton, filter === 'Insomnia' && styles.activeFilter]}
-                        onPress={() => setFilter('Insomnia')}
-                    >
-                        <Text style={[styles.filterText, filter === 'Insomnia' && styles.activeFilterText]}>Insomnia</Text>
-                    </TouchableOpacity>
+                    {(['All', 'Hypertension', 'Diabetes', 'Obesity', 'Anxiety', 'PCOS', 'Insomnia'] as FilterType[]).map((filterType) => (
+                        <TouchableOpacity
+                            key={filterType}
+                            style={[styles.filterButton, filter === filterType && styles.activeFilter]}
+                            onPress={() => setFilter(filterType)}
+                        >
+                            <Text style={[styles.filterText, filter === filterType && styles.activeFilterText]}>
+                                {filterType}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
                 </View>
 
                 <FlatList
                     data={filteredDoctors}
-                    keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => (
+                    keyExtractor={(_, index) => index.toString()}
+                    renderItem={({ item }: { item: Doctor }) => (
                         <TouchableOpacity
                             onPress={() => {
                                 dispatch(updateDoctorName(item.name));
                                 dispatch(updateDoctorImage(item.image));
-                                navigation.navigate('Profile', {data : item});
+                                navigation.navigate('Profile', { data: item });
                             }}
                         >
                             <View style={styles.card}>
-                                <TouchableOpacity></TouchableOpacity>
                                 <Image source={{ uri: item.image }} style={styles.image} />
                                 <View style={styles.details}>
                                     <Text style={styles.name}>{item.name}</Text>
@@ -132,13 +124,13 @@ const styles = StyleSheet.create({
         borderRadius: 35,
         marginRight: 15,
     },
-    activeFilterText:{
-        color:'white', 
+    activeFilterText: {
+        color: 'white',
     },
-    videoButtonFeesText : {
-       color : 'black',
-       alignItems : 'center',
-       justifyContent : 'center',
+    videoButtonFeesText: {
+        color: 'black',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     details: {
         flex: 1,
@@ -166,15 +158,14 @@ const styles = StyleSheet.create({
     consultation: {
         flexDirection: 'row',
         marginTop: 10,
-        marginLeft : -65
+        marginLeft: -65
     },
     videoButton: {
         backgroundColor: '#f5f5f5',
         padding: 8,
         borderRadius: 5,
         marginRight: 10,
-        alignItems : 'center'
-
+        alignItems: 'center'
     },
     videoButtonText: {
         color: '#b0b0b0',
@@ -206,7 +197,6 @@ const styles = StyleSheet.create({
     },
     activeFilter: {
         backgroundColor: '#3A643C',
-        color : "white"
     },
     filterText: {
         fontSize: 12,
